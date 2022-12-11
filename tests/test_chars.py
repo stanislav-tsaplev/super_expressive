@@ -1,4 +1,4 @@
-from main import SuperExpressive
+from ..src import SuperExpressive
 
 
 def test_any_char():

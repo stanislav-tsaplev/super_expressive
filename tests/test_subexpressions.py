@@ -1,6 +1,6 @@
 import pytest
 
-from main import SuperExpressive, RegexError
+from ..src import SuperExpressive, RegexError
 
 
 def test_subexpression_must_be_a_super_expressive_instance():

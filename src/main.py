@@ -1,7 +1,7 @@
 import re
 from copy import deepcopy
 
-from base import _StackFrame, _Token, _Tokens, _SubOptions
+from .base import _StackFrame, _Token, _Tokens, _SubOptions
 
 
 class RegexError(ValueError):

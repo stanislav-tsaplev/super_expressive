@@ -1,6 +1,6 @@
 import pytest
 
-from main import SuperExpressive, RegexError
+from ..src import SuperExpressive, RegexError
 
 
 def test_group():

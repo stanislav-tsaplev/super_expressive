@@ -1,1 +1,1 @@
-from src.main import SuperExpressive, RegexError
+from .src import SuperExpressive, RegexError
