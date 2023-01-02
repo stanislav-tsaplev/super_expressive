@@ -5,7 +5,7 @@ from .base import _StackFrame, _Token, _Tokens, _SubOptions
 
 
 class RegexError(ValueError):
-    pass
+    """A ValueError related to building regex via the fluent API"""
 
 
 _special_chars = r"\.^$|?*+()[]{}-"
@@ -285,7 +285,7 @@ class SuperExpressive:
 
         if not isinstance(chars, str):
             raise RegexError(f"chars must be a string (got {chars})")
-        if len(chars) <= 0:
+        if len(chars) == 0:
             raise RegexError("chars must have at least one character")
 
         next = deepcopy(self)
@@ -303,7 +303,7 @@ class SuperExpressive:
         
         if not isinstance(chars, str):
             raise RegexError(f"chars must be a string (got {chars})")
-        if len(chars) <= 0:
+        if len(chars) == 0:
             raise RegexError("chars must have at least one character")
 
         next = deepcopy(self)
@@ -947,16 +947,16 @@ class SuperExpressive:
                 return ''.join(evaluated)
 
             case _: 
-                raise RegexError(f"Can'_Tokens process unsupported element type: {element.type}")
+                raise RegexError(f"Can't process unsupported element type: {element.type}")
 
 
     def __get_regex_pattern(self) -> str:
         if len(self.stack) != 1:
             current_frame = self.stack[-1]
             raise RegexError(
-            "Cannot compute the value of a not yet fully specified regex object.\n"
-            f"(Try adding a .end() call to match the '{current_frame.token.type}')"
-        )
+                "Cannot compute the value of a not yet fully specified regex object.\n"
+                f"(Try adding a .end() call to match the '{current_frame.token.type}')"
+            )
         
         current_frame = self.stack[-1]
         evaluated = [SuperExpressive.__evaluate(element) for element in current_frame.elements]

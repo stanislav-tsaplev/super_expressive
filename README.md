@@ -419,6 +419,9 @@ pattern = (
 
 Matches the exact (single) character `c`.
 
+The `c` parameter must be a single character string.
+Raises a `RegexError` otherwise.
+
 **Example:**
 ```py
 pattern = (
@@ -433,6 +436,9 @@ pattern = (
 [=] **`.string(s: str)`**
 
 Matches the exact string (the sequential characters) `s`.
+
+The `s` parameter must be a non-empty string.
+Raises a `RegexError` otherwise.
 
 **Example:**
 ```py
@@ -450,6 +456,10 @@ pattern = (
 Matches any character that falls between `a` and `b`.
 
 Ordering is defined by a characters ASCII or unicode value.
+
+Both `a` and `b` parameters must be a single character string or a single digit integer.
+The `a` character must precede the `b` character alphabetically.
+Otherwise raises `RegexError`.
 
 **Example:**
 ```py
@@ -595,6 +605,9 @@ pattern = (
 
 Matches any of the characters in the provided string `chars`.
 
+The `chars` parameter must be a non-empty string.
+Raises `RegexError` otherwise.
+
 **Example:**
 ```py
 pattern = (
@@ -611,6 +624,9 @@ pattern = (
 - `.anythingButChars(chars: str)`
 
 Matches any character, except any of those in the provided string `chars`.
+
+The `chars` parameter must be a non-empty string.
+Raises `RegexError` otherwise.
 
 **Example:**
 ```py
@@ -629,6 +645,10 @@ pattern = (
 
 Matches any character, except those that would be captured by the range specified by `a` and `b`.
 
+Both `a` and `b` parameters must be a single character string or a single digit integer.
+The `a` character must precede the `b` character alphabetically.
+Raises `RegexError` otherwise.
+
 **Example:**
 ```py
 pattern = (
@@ -645,6 +665,9 @@ pattern = (
 - `.anythingButString(s: str)`
 
 Matches any string the same length as `s`, except the `s` itself (the sequential characters in `s`).
+
+The `s` parameter must be a non-empty string.
+Raises `RegexError` otherwise.
 
 **Example:**
 ```py
@@ -691,6 +714,9 @@ Needs to be finalised with `.end()` or `.over`.
 
 Can be later referenced with `.named_backreference(name)` or `.backreference(index)`.
 
+The `name` parameter must be non-empty string consisting of latin letters, numbers, and underscores only and must not coincide with the name of the capture group defined before.
+Raises `RegexError` otherwise.
+
 *Warning: this produces a different regex syntax than the original one (Python, not JS).*
 
 **Example:**
@@ -715,6 +741,9 @@ pattern = (
 Matches exactly what was previously matched by a `.capture` or `.named_capture` using a positional index.
 
 Note that regex indices start at 1, so the first capture group has index 1.
+
+The `index` parameter must be a number between 1 and capture groups count.
+Raises `RegexError` otherwise.
 
 *Warning: this produces a different regex syntax than the original one (Python, not JS).*
 
@@ -743,6 +772,9 @@ pattern = (
 
 Matches exactly what was previously matched by a `.named_capture`.
 
+The `name` parameter must be one of the names of existing capture groups.
+Raises `RegexError` otherwise.
+
 *Warning: this produces a different regex syntax than the original one (Python, not JS).*
 
 **Example:**
@@ -765,7 +797,7 @@ pattern = (
 
 [=] **`.optional`**
 
-Assert that the proceeding element may or may not be matched.
+Asserts that the proceeding element may or may not be matched.
 
 **Example:**
 ```py
@@ -781,7 +813,7 @@ pattern = (
 [=] **`.zero_or_more`**
 - `.zeroOrMore`
 
-Assert that the proceeding element may not be matched, or may be matched multiple times.
+Asserts that the proceeding element may not be matched, or may be matched multiple times.
 
 **Example:**
 ```py
@@ -797,7 +829,7 @@ pattern = (
 [=] **`.zero_or_more_lazy`**
 - `.zeroOrMoreLazy`
 
-Assert that the proceeding element may not be matched, or may be matched multiple times, but as few times as possible.
+Asserts that the proceeding element may not be matched, or may be matched multiple times, but as few times as possible.
 
 **Example:**
 ```py
@@ -813,7 +845,7 @@ pattern = (
 [=] **`.one_or_more`**
 - `.oneOrMore`
 
-Assert that the proceeding element may be matched once, or may be matched multiple times.
+Asserts that the proceeding element may be matched once, or may be matched multiple times.
 
 **Example:**
 ```py
@@ -829,7 +861,7 @@ pattern = (
 [=] **`.one_or_more_lazy`**
 - `.oneOrMoreLazy`
 
-Assert that the proceeding element may be matched once, or may be matched multiple times, but as few times as possible.
+Asserts that the proceeding element may be matched once, or may be matched multiple times, but as few times as possible.
 
 **Example:**
 ```py
@@ -844,7 +876,11 @@ pattern = (
 
 [=] **`.exactly(n: int)`**
 
-Assert that the proceeding element will be matched exactly `n` times.
+Asserts that the proceeding element will be matched exactly `n` times.
+
+The `n` parameter must be a positive integer.
+The application of the method must not conflict with previously applied quantifiers.
+Raises `RegexError` otherwise.
 
 **Example:**
 ```py
@@ -860,7 +896,11 @@ pattern = (
 [=] **`.at_least(n: int)`**
 - `.atLeast(n: int)`
 
-Assert that the proceeding element will be matched at least `n` times.
+Asserts that the proceeding element will be matched at least `n` times.
+
+The `n` parameter must be a positive integer.
+The application of the method must not conflict with previously applied quantifiers.
+Raises `RegexError` otherwise.
 
 **Example:**
 ```py
@@ -875,7 +915,12 @@ pattern = (
 
 [=] **`.between(x: int, y: int)`**
 
-Assert that the proceeding element will be matched somewhere between `x` and `y` times.
+Asserts that the proceeding element will be matched somewhere between `x` and `y` times.
+
+Both `x` and `y` parameters must be non-negative integers.
+The `x` parameter must be less than `y` parameter.
+The application of the method must not conflict with previously applied quantifiers.
+Raises `RegexError` otherwise.
 
 **Example:**
 ```py
@@ -891,7 +936,12 @@ pattern = (
 [=] **`.between_lazy(x: int, y: int)`**
 - `.betweenLazy(x: int, y: int)`
 
-Assert that the proceeding element will be matched somewhere between `x` and `y` times, but as few times as possible.
+Asserts that the proceeding element will be matched somewhere between `x` and `y` times, but as few times as possible.
+
+Both `x` and `y` parameters must be non-negative integers.
+The `x` parameter must be less than `y` parameter.
+The application of the method must not conflict with previously applied quantifiers.
+Raises `RegexError` otherwise.
 
 **Example:**
 ```py
@@ -907,7 +957,7 @@ pattern = (
 [+] **`.start_of_string`**
 - `.startOfString`
 
-Always assert the start of input string, regardless of using multiline mode (aka `.line_by_line`).
+Always asserts the start of input string, regardless of using multiline mode (aka `.line_by_line`).
 
 **Example:**
 ```py
@@ -924,7 +974,7 @@ pattern = (
 [+] **`.end_of_string`**
 - `.endOfString`
 
-Always assert the end of input string, regardless of using multiline mode (aka `.line_by_line`).
+Always asserts the end of input string, regardless of using multiline mode (aka `.line_by_line`).
 
 **Example:**
 ```py
@@ -941,7 +991,10 @@ pattern = (
 [=] **`.start_of_input`**
 - `.startOfInput`
 
-Assert the start of input string, or the start of a line when multiline mode ( aka `.line_by_line`) is used.
+Asserts the start of input string, or the start of a line when multiline mode ( aka `.line_by_line`) is used.
+
+The application of the method must not conflict with previously applied start-of-input or end-of-input methods.
+Raises `RegexError` otherwise.
 
 **Example:**
 ```py
@@ -958,7 +1011,10 @@ pattern = (
 [=] **`.end_of_input`**
 - `.endOfInput`
 
-Assert the end of input string, or the end of a line when multiline mode (aka `.line_by_line`) is used.
+Asserts the end of input string, or the end of a line when multiline mode (aka `.line_by_line`) is used.
+
+The application of the method must not conflict with previously applied end-of-input method.
+Raises `RegexError` otherwise.
 
 **Example:**
 ```py
@@ -977,6 +1033,9 @@ pattern = (
 Closes the context of `.any_of`, `.group`, `.capture`, or `.assert_*`.
 
 Requires parentheses when invoked (see also `.over`).
+
+The method must not be applied out of the context mentioned above.
+Raises `RegexError` otherwise.
 
 **Example:**
 ```py
@@ -1003,6 +1062,9 @@ Closes the context of `.any_of`, `.group`, `.capture` or `.assert_*`.
 
 Alias for `.end()`, but doesn't require parentheses.
 
+The method must not be applied out of the context mentioned above.
+Raises `RegexError` otherwise.
+
 **Example:**
 ```py
 pattern = (
@@ -1028,6 +1090,9 @@ pattern = (
 Matches another `SuperExpressive` instance inline. 
 
 Can be used to create libraries, or to modularise you code.
+
+The `expr` parameter must be a correctly defined `SuperExpressive` object and must not conflict with start-of-input or end-of-input markers defined in the caller object (see also `ignore_start_and_end` parameter description below).
+Raises `RegexError` otherwise.
 
 **Example:**
 ```py
