@@ -30,6 +30,15 @@ _quantifier_table = {
 
 
 class SuperExpressive:
+    __slots__ = (
+        "has_defined_start",
+        "has_defined_end",
+        "flags",
+        "stack",
+        "named_groups",
+        "total_capture_groups"
+    )
+
     def __init__(self) -> None:
         self.has_defined_start = False
         self.has_defined_end = False
