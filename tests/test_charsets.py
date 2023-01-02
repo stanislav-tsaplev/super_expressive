@@ -25,6 +25,8 @@ def test_anything_but_chars():
 
     assert regex == se.to_regex_string()
     assert regex == se.to_regex().pattern
+
+    
 def test_range():
     regex = r"[a-z]"
     se = SuperExpressive().range('a', 'z')
