@@ -31,23 +31,23 @@ _quantifier_table = {
 
 class SuperExpressive:
     __slots__ = (
-        "has_defined_start",
-        "has_defined_end",
-        "flags",
-        "stack",
-        "named_groups",
-        "total_capture_groups"
+        "__has_defined_start",
+        "__has_defined_end",
+        "__flags",
+        "__stack",
+        "__named_groups",
+        "__total_capture_groups"
     )
 
     def __init__(self) -> None:
-        self.has_defined_start = False
-        self.has_defined_end = False
+        self.__has_defined_start = False
+        self.__has_defined_end = False
         
-        self.flags: dict[str, bool] = { ch: False for ch in "aimsu" }
+        self.__flags: dict[str, bool] = { ch: False for ch in "aimsu" }
 
-        self.stack: list[_StackFrame] = [_StackFrame(_Tokens.root)]
-        self.named_groups: list[str] = []
-        self.total_capture_groups = 0
+        self.__stack: list[_StackFrame] = [_StackFrame(_Tokens.root)]
+        self.__named_groups: list[str] = []
+        self.__total_capture_groups = 0
 
     @property
     def ascii(self):
@@ -56,7 +56,7 @@ class SuperExpressive:
         that it should use only ascii characters matching.
         """
         next = deepcopy(self)
-        next.flags['a'] = True
+        next.__flags['a'] = True
         return next
 
     @property
@@ -66,7 +66,7 @@ class SuperExpressive:
         that it should treat ignore the uppercase/lowercase distinction when matching.
         """
         next = deepcopy(self)
-        next.flags['i'] = True
+        next.__flags['i'] = True
         return next
 
     @property
@@ -77,7 +77,7 @@ class SuperExpressive:
         as the start and end of lines.
         """
         next = deepcopy(self)
-        next.flags['m'] = True
+        next.__flags['m'] = True
         return next
 
     @property
@@ -89,7 +89,7 @@ class SuperExpressive:
         the start and end of input, and `.any_char` also matches newlines.
         """
         next = deepcopy(self)
-        next.flags['s'] = True
+        next.__flags['s'] = True
         return next
 
     @property
@@ -101,7 +101,7 @@ class SuperExpressive:
         (but you can use `.ascii` instead when necessary).
         """
         next = deepcopy(self)
-        next.flags['u'] = True
+        next.__flags['u'] = True
         return next
 
     @property
@@ -191,7 +191,7 @@ class SuperExpressive:
             raise RegexError(f"char() can only be called with a single character (got {c})")
 
         next = deepcopy(self)
-        current_frame = next.stack[-1]
+        current_frame = next.__stack[-1]
         current_frame.elements.append(
             next.__apply_quantifier(_Tokens.char(_escape_special(c)))
         )
@@ -212,7 +212,7 @@ class SuperExpressive:
             if len(s) > 1
             else _Tokens.char(_escape_special(s))
         )
-        current_frame = next.stack[-1]
+        current_frame = next.__stack[-1]
         current_frame.elements.append(
             next.__apply_quantifier(element_value)
         )
@@ -237,7 +237,7 @@ class SuperExpressive:
 
         next = deepcopy(self)
         element_value = _Tokens.range(value=(a, b))
-        current_frame = next.stack[-1]
+        current_frame = next.__stack[-1]
         
         current_frame.elements.append(
             next.__apply_quantifier(element_value)
@@ -300,7 +300,7 @@ class SuperExpressive:
         next = deepcopy(self)
 
         element_value = _Tokens.any_of_chars(_escape_special(chars))
-        current_frame = next.stack[-1]
+        current_frame = next.__stack[-1]
 
         current_frame.elements.append(
             next.__apply_quantifier(element_value)
@@ -318,7 +318,7 @@ class SuperExpressive:
         next = deepcopy(self)
 
         element_value = _Tokens.anything_but_chars(_escape_special(chars))
-        current_frame = next.stack[-1]
+        current_frame = next.__stack[-1]
 
         current_frame.elements.append(
             next.__apply_quantifier(element_value)
@@ -345,7 +345,7 @@ class SuperExpressive:
         next = deepcopy(self)
 
         element_value = _Tokens.anything_but_range(value=(a, b))
-        current_frame = next.stack[-1]
+        current_frame = next.__stack[-1]
 
         current_frame.elements.append(
             next.__apply_quantifier(element_value)
@@ -370,7 +370,7 @@ class SuperExpressive:
 
         # element_value = _Tokens.anything_but_string(_escape_special(s))
         element_value = _Tokens.anything_but_string(s)
-        current_frame = next.stack[-1]
+        current_frame = next.__stack[-1]
 
         current_frame.elements.append(
             next.__apply_quantifier(element_value)
@@ -386,8 +386,8 @@ class SuperExpressive:
         next = deepcopy(self)
 
         new_frame = _StackFrame(_Tokens.capture)
-        next.stack.append(new_frame)
-        next.total_capture_groups += 1
+        next.__stack.append(new_frame)
+        next.__total_capture_groups += 1
 
         return next
 
@@ -398,10 +398,10 @@ class SuperExpressive:
         """
         if not isinstance(index, int):
             raise RegexError("index must be a number")
-        if not 0 < index <= self.total_capture_groups:
+        if not 0 < index <= self.__total_capture_groups:
             raise RegexError(
                 f"invalid index {index}. "
-                f"There are {self.total_capture_groups} capture groups on this SuperExpression"
+                f"There are {self.__total_capture_groups} capture groups on this SuperExpression"
             )
         return self.__match_element(_Tokens.backreference(index))
 
@@ -414,14 +414,14 @@ class SuperExpressive:
         new_frame = _StackFrame(_Tokens.named_capture(name))
 
         next.__track_named_group(name)
-        next.stack.append(new_frame)
-        next.total_capture_groups += 1
+        next.__stack.append(new_frame)
+        next.__total_capture_groups += 1
 
         return next
 
     def named_backreference(self, name: str) -> "SuperExpressive":
         """Matches exactly what was previously matched by a `.named_capture`."""
-        if name not in self.named_groups:
+        if name not in self.__named_groups:
             raise RegexError(f"no capture group called '{name}' exists (create one with .named_capture())")
         return self.__match_element(_Tokens.named_backreference(name))
 
@@ -461,7 +461,7 @@ class SuperExpressive:
             raise RegexError(f"n must be a positive integer (got {n})")
 
         next = deepcopy(self)
-        current_frame = next.stack[-1]
+        current_frame = next.__stack[-1]
         if current_frame.quantifier:
             raise RegexError(
                 f"cannot quantify regular expression with 'exactly' "
@@ -477,7 +477,7 @@ class SuperExpressive:
             raise RegexError(f"n must be a positive integer (got {n})")
 
         next = deepcopy(self)
-        current_frame = next.stack[-1]
+        current_frame = next.__stack[-1]
         if current_frame.quantifier:
             raise RegexError(
                 f"cannot quantify regular expression with 'at_least' "
@@ -497,7 +497,7 @@ class SuperExpressive:
             raise RegexError(f"x must be less than y (x = {x}, y = {y})")
 
         next = deepcopy(self)
-        current_frame = next.stack[-1]
+        current_frame = next.__stack[-1]
         if current_frame.quantifier:
             raise RegexError(
                 f"cannot quantify regular expression with 'between' "
@@ -518,7 +518,7 @@ class SuperExpressive:
             raise RegexError(f"x must be less than y (x = {x}, y = {y})")
 
         next = deepcopy(self)
-        current_frame = next.stack[-1]
+        current_frame = next.__stack[-1]
         if current_frame.quantifier:
             raise RegexError(
                 f"cannot quantify regular expression with 'between_lazy' "
@@ -532,7 +532,7 @@ class SuperExpressive:
         """Always assert the start of input string, regardless of using multiline mode (`.line_by_line`)."""
 
         next = deepcopy(self)
-        next.stack[-1].elements.append(_Tokens.start_of_string)
+        next.__stack[-1].elements.append(_Tokens.start_of_string)
         return next
 
     @property
@@ -540,7 +540,7 @@ class SuperExpressive:
         """Always assert the end of input string, regardless of using multiline mode (`.line_by_line`)."""
 
         next = deepcopy(self)
-        next.stack[-1].elements.append(_Tokens.end_of_string)
+        next.__stack[-1].elements.append(_Tokens.end_of_string)
         return next
 
     @property
@@ -549,14 +549,14 @@ class SuperExpressive:
         when multiline mode (`.line_by_line`) is used.
         """
 
-        if self.has_defined_start:
+        if self.__has_defined_start:
             raise RegexError("This regex already has a defined start of input")
-        if self.has_defined_end:
+        if self.__has_defined_end:
             raise RegexError("Cannot define the start of input after the end of input")
 
         next = deepcopy(self)
-        next.has_defined_start = True
-        next.stack[-1].elements.append(_Tokens.start_of_input)
+        next.__has_defined_start = True
+        next.__stack[-1].elements.append(_Tokens.start_of_input)
         return next
 
     @property
@@ -565,27 +565,27 @@ class SuperExpressive:
         when multiline mode (`.line_by_line`) is used.
         """
 
-        if self.has_defined_end:
+        if self.__has_defined_end:
             raise RegexError("This regex already has a defined end of input")
 
         next = deepcopy(self)
-        next.has_defined_end = True
-        next.stack[-1].elements.append(_Tokens.end_of_input)
+        next.__has_defined_end = True
+        next.__stack[-1].elements.append(_Tokens.end_of_input)
         return next
 
     def end(self) -> "SuperExpressive":
         """Closes the context of `.any_of`, `.group`, `.capture`, or `.assert_*`.\n
         Requires parentheses when invoked (see also `.over`).
         """
-        if len(self.stack) <= 1:
+        if len(self.__stack) <= 1:
             raise RegexError("Cannot call end while building the root expression")
 
         next = deepcopy(self)
 
-        old_frame = next.stack.pop()
+        old_frame = next.__stack.pop()
         assert old_frame.token.value
 
-        current_frame = next.stack[-1]
+        current_frame = next.__stack[-1]
         current_frame.elements.append(
             next.__apply_quantifier(old_frame.token.value(old_frame.elements))
         )
@@ -612,10 +612,10 @@ class SuperExpressive:
         """
         if not isinstance(expr, SuperExpressive):
             raise RegexError("expr must be a SuperExpressive instance")
-        if len(expr.stack) != 1:
+        if len(expr.__stack) != 1:
             raise RegexError(
                 "Cannot call subexpression with a not yet fully specified regex object.\n"
-                f"(Try adding a .end() call to match the '{expr.stack[-1].token.type}' "
+                f"(Try adding a .end() call to match the '{expr.__stack[-1].token.type}' "
                 "on the subexpression)"
             )
 
@@ -630,7 +630,7 @@ class SuperExpressive:
 
         additional_capture_groups = { "count": 0 }
             
-        sub_frame = sub_next.stack[-1]
+        sub_frame = sub_next.__stack[-1]
         sub_frame.elements = [
             SuperExpressive.__merge_subexpression(
                 element, options, next, additional_capture_groups
@@ -638,13 +638,13 @@ class SuperExpressive:
             for element in sub_frame.elements
         ]
 
-        next.total_capture_groups += additional_capture_groups["count"]
+        next.__total_capture_groups += additional_capture_groups["count"]
 
         if not options.ignore_flags:
-            for flag, enabled in sub_next.flags.items():
-                next.flags[flag] = next.flags[flag] or enabled
+            for flag, enabled in sub_next.__flags.items():
+                next.__flags[flag] = next.__flags[flag] or enabled
 
-        current_frame = next.stack[-1]
+        current_frame = next.__stack[-1]
         current_frame.elements.append(
             next.__apply_quantifier(_Tokens.subexpression(sub_frame.elements))
         )
@@ -671,7 +671,7 @@ class SuperExpressive:
             return pattern
 
     def __apply_quantifier(self, element: _Token) -> _Token:
-        current_frame = self.stack[-1]
+        current_frame = self.__stack[-1]
         if current_frame.quantifier:
             assert current_frame.quantifier.value
 
@@ -683,12 +683,12 @@ class SuperExpressive:
     def __frame_creating_element(self, type_fn) -> "SuperExpressive":
         next = deepcopy(self)
         new_frame = _StackFrame(type_fn)
-        next.stack.append(new_frame)
+        next.__stack.append(new_frame)
         return next
 
     def __match_element(self, type_fn) -> "SuperExpressive":
         next = deepcopy(self)
-        current_frame = next.stack[-1]
+        current_frame = next.__stack[-1]
         current_frame.elements.append(
             next.__apply_quantifier(type_fn)
         )
@@ -696,7 +696,7 @@ class SuperExpressive:
 
     def __quantifier_element(self, type_fn_name: str) -> "SuperExpressive":
         next = deepcopy(self)
-        current_frame = next.stack[-1]
+        current_frame = next.__stack[-1]
 
         if current_frame.quantifier:
             raise RegexError(
@@ -711,12 +711,12 @@ class SuperExpressive:
             raise RegexError(f"name must be a string (got {name})")
         if len(name) == 0:
             raise RegexError("name must be at least one character")
-        if name in self.named_groups:
+        if name in self.__named_groups:
             raise RegexError(f"cannot use {name} again for a capture group")
         if not _named_group_regex.match(name):
             raise RegexError(f"name '{name}' is not valid (only letters, numbers, and underscores)")
         
-        self.named_groups.append(name)
+        self.__named_groups.append(name)
 
     @staticmethod
     def _is_fusable(element: _Token) -> bool:
@@ -763,7 +763,7 @@ class SuperExpressive:
 
         match next_element.type:
             case "backreference":
-                next_element.index += parent.total_capture_groups
+                next_element.index += parent.__total_capture_groups
 
             case "capture":
                 capture_groups_counter["count"] += 1
@@ -789,34 +789,34 @@ class SuperExpressive:
                 if options.ignore_start_and_end:
                     return _Tokens.noop
 
-                if parent.has_defined_start:
+                if parent.__has_defined_start:
                     raise RegexError(
                         "The parent regex already has a defined start of input. "
                         "You can ignore a subexpressions start_of_input/end_of_input markers "
                         "with the ignore_start_and_end option"
                     )
 
-                if parent.has_defined_end:
+                if parent.__has_defined_end:
                     raise RegexError(
                         "The parent regex already has a defined end of input. "
                         "You can ignore a subexpressions start_of_input/end_of_input markers "
                         "with the ignore_start_and_end option"
                     )
 
-                parent.has_defined_start = True
+                parent.__has_defined_start = True
 
             case "end_of_input":
                 if options.ignore_start_and_end:
                     return _Tokens.noop
 
-                if parent.has_defined_end:
+                if parent.__has_defined_end:
                     raise RegexError(
                         "The parent regex already has a defined end of input. "
                         "You can ignore a subexpressions start_of_input/end_of_input markers "
                         "with the ignore_start_and_end option"
                     )
                 
-                parent.has_defined_end = True
+                parent.__has_defined_end = True
 
         return next_element
 
@@ -960,14 +960,14 @@ class SuperExpressive:
 
 
     def __get_regex_pattern(self) -> str:
-        if len(self.stack) != 1:
-            current_frame = self.stack[-1]
+        if len(self.__stack) != 1:
+            current_frame = self.__stack[-1]
             raise RegexError(
                 "Cannot compute the value of a not yet fully specified regex object.\n"
                 f"(Try adding a .end() call to match the '{current_frame.token.type}')"
             )
         
-        current_frame = self.stack[-1]
+        current_frame = self.__stack[-1]
         evaluated = [SuperExpressive.__evaluate(element) for element in current_frame.elements]
         pattern = "".join(evaluated)
 
@@ -976,7 +976,7 @@ class SuperExpressive:
     def __get_regex_flags(self) -> str:
         flags = [
             name if is_on else ""
-            for name, is_on in self.flags.items()
+            for name, is_on in self.__flags.items()
         ]
 
         return "".join(sorted(flags))
