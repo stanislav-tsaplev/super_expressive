@@ -1,4 +1,4 @@
-from ..src import SuperExpressive
+from ..src.super_expressive import SuperExpressive
 
 
 def test_empty_regex():
