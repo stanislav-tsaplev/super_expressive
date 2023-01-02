@@ -183,7 +183,11 @@ class SuperExpressive:
         return self.__match_element(_Tokens.null_byte)
 
     def char(self, c: str) -> "SuperExpressive":
-        """Matches the exact (single) character `c`."""
+        """Matches the exact (single) character `c`.
+        
+        The `c` parameter must be a single character string.
+        Raises a `RegexError` otherwise.
+        """
 
         if not isinstance(c, str):
             raise RegexError(f"c must be a string (got {c})")
@@ -199,7 +203,11 @@ class SuperExpressive:
         return next
 
     def string(self, s: str) -> "SuperExpressive":
-        """Matches the exact string (the sequential characters) `s`."""
+        """Matches the exact string (the sequential characters) `s`.
+        
+        The `s` parameter must be a non-empty string.
+        Raises a `RegexError` otherwise.
+        """
 
         if not isinstance(s, str):
             raise RegexError(f"s must be a string (got {s})")
@@ -221,7 +229,12 @@ class SuperExpressive:
 
     def range(self, a: str|int, b: str|int) -> "SuperExpressive":
         """Matches any character that falls between `a` and `b`. \n
-        Ordering is defined by a characters ASCII or unicode value."""
+        Ordering is defined by a characters ASCII or unicode value.
+        
+        Both `a` and `b` parameters must be a single character string or a single digit integer.
+        The `a` character must precede the `b` character alphabetically.
+        Otherwise raises `RegexError`.
+        """
 
         a, b = str(a), str(b)
 
@@ -290,7 +303,11 @@ class SuperExpressive:
         return self.__frame_creating_element(_Tokens.any_of)
 
     def any_of_chars(self, chars: str) -> "SuperExpressive":
-        """Matches any of the characters in the provided string `chars`."""
+        """Matches any of the characters in the provided string `chars`.
+
+        The `chars` parameter must be a non-empty string.
+        Raises `RegexError` otherwise.        
+        """
 
         if not isinstance(chars, str):
             raise RegexError(f"chars must be a string (got {chars})")
@@ -308,7 +325,11 @@ class SuperExpressive:
         return next
 
     def anything_but_chars(self, chars: str) -> "SuperExpressive":
-        """Matches any character, except any of those in the provided string `chars`."""
+        """Matches any character, except any of those in the provided string `chars`.
+
+        The `chars` parameter must be a non-empty string.
+        Raises `RegexError` otherwise.
+        """
         
         if not isinstance(chars, str):
             raise RegexError(f"chars must be a string (got {chars})")
@@ -328,6 +349,10 @@ class SuperExpressive:
     def anything_but_range(self, a: str, b: str) -> "SuperExpressive":
         """Matches any character, except those that would be captured 
         by the range specified by `a` and `b`.
+
+        Both `a` and `b` parameters must be a single character string or a single digit integer.
+        The `a` character must precede the `b` character alphabetically.
+        Raises `RegexError` otherwise.
         """
 
         a, b = str(a), str(b)
@@ -355,6 +380,9 @@ class SuperExpressive:
     def anything_but_string(self, s: str) -> "SuperExpressive":
         """Matches any string the same length as `s`, 
         except the `s` itself (the characters sequentially defined in `s`).
+
+        The `s` parameter must be a non-empty string.
+        Raises `RegexError` otherwise
         """
 
         if not isinstance(s, str):
@@ -395,6 +423,9 @@ class SuperExpressive:
         """Matches exactly what was previously matched by a `.capture` or `.named_capture` 
         using a positional index. \n
         Note that regex indices start at 1, so the first capture group has index 1.
+
+        The `index` parameter must be a number between 1 and capture groups count.
+        Raises `RegexError` otherwise.
         """
         if not isinstance(index, int):
             raise RegexError("index must be a number")
@@ -409,6 +440,11 @@ class SuperExpressive:
         """Creates a named capture group for the proceeding elements. \n
         Needs to be finalised with `.end()` or `.over`. \n
         Can be later referenced with `.named_backreference(name)` or `.backreference(index)`.
+
+        The `name` parameter must be non-empty string 
+        consisting of latin letters, numbers, and underscores only 
+        and must not coincide with the name of the capture group defined before.
+        Raises `RegexError` otherwise.
         """
         next = deepcopy(self)
         new_frame = _StackFrame(_Tokens.named_capture(name))
@@ -420,7 +456,12 @@ class SuperExpressive:
         return next
 
     def named_backreference(self, name: str) -> "SuperExpressive":
-        """Matches exactly what was previously matched by a `.named_capture`."""
+        """Matches exactly what was previously matched by a `.named_capture`.
+        
+        The `name` parameter must be one of the names of existing capture groups.
+        Raises `RegexError` otherwise.
+        """
+        
         if name not in self.__named_groups:
             raise RegexError(f"no capture group called '{name}' exists (create one with .named_capture())")
         return self.__match_element(_Tokens.named_backreference(name))
@@ -455,7 +496,12 @@ class SuperExpressive:
         return self.__quantifier_element("one_or_more_lazy")
 
     def exactly(self, n: int) -> "SuperExpressive":
-        """Assert that the proceeding element will be matched exactly `n` times."""
+        """Assert that the proceeding element will be matched exactly `n` times.
+        
+        The `n` parameter must be a positive integer.
+        The application of the method must not conflict with previously applied quantifiers.
+        Raises `RegexError` otherwise.
+        """
 
         if not isinstance(n, int) or n <= 0:
             raise RegexError(f"n must be a positive integer (got {n})")
@@ -471,7 +517,12 @@ class SuperExpressive:
         return next
 
     def at_least(self, n: int) -> "SuperExpressive":
-        """Assert that the proceeding element will be matched at least `n` times."""
+        """Assert that the proceeding element will be matched at least `n` times.
+
+        The `n` parameter must be a positive integer.
+        The application of the method must not conflict with previously applied quantifiers.
+        Raises `RegexError` otherwise.
+        """
 
         if not isinstance(n, int) or n <= 0:
             raise RegexError(f"n must be a positive integer (got {n})")
@@ -487,7 +538,13 @@ class SuperExpressive:
         return next
 
     def between(self, x: int, y: int) -> "SuperExpressive":
-        """Assert that the proceeding element will be matched somewhere between `x` and `y` times."""
+        """Assert that the proceeding element will be matched somewhere between `x` and `y` times.
+
+        Both `x` and `y` parameters must be non-negative integers.
+        The `x` parameter must be less than `y` parameter.
+        The application of the method must not conflict with previously applied quantifiers.
+        Raises `RegexError` otherwise.
+        """
 
         if not isinstance(x, int) or x < 0:
             raise RegexError(f"x must be an integer (got {x})")
@@ -509,6 +566,11 @@ class SuperExpressive:
     def between_lazy(self, x: int, y: int) -> "SuperExpressive":
         """Assert that the proceeding element will be matched somewhere between `x` and `y` times, 
         but as few times as possible.
+
+        Both `x` and `y` parameters must be non-negative integers.
+        The `x` parameter must be less than `y` parameter.
+        The application of the method must not conflict with previously applied quantifiers.
+        Raises `RegexError` otherwise.
         """
         if not isinstance(x, int) or x < 0:
             raise RegexError(f"x must be an integer (got {x})")
@@ -547,6 +609,9 @@ class SuperExpressive:
     def start_of_input(self) -> "SuperExpressive":
         """Assert the start of input string, or the start of a line 
         when multiline mode (`.line_by_line`) is used.
+
+        The application of the method must not conflict with previously applied start-of-input or end-of-input methods.
+        Raises `RegexError` otherwise.
         """
 
         if self.__has_defined_start:
@@ -563,6 +628,9 @@ class SuperExpressive:
     def end_of_input(self) -> "SuperExpressive":
         """Assert the end of input string, or the end of a line 
         when multiline mode (`.line_by_line`) is used.
+
+        The application of the method must not conflict with previously applied end-of-input method.
+        Raises `RegexError` otherwise.
         """
 
         if self.__has_defined_end:
@@ -576,6 +644,9 @@ class SuperExpressive:
     def end(self) -> "SuperExpressive":
         """Closes the context of `.any_of`, `.group`, `.capture`, or `.assert_*`.\n
         Requires parentheses when invoked (see also `.over`).
+
+        The method must not be applied out of the context mentioned above.
+        Raises `RegexError` otherwise.
         """
         if len(self.__stack) <= 1:
             raise RegexError("Cannot call end while building the root expression")
@@ -609,6 +680,11 @@ class SuperExpressive:
         should be disregarded (default is True). \n
         `ignore_start_and_end`: If set to true, any `.start_of_input`/`.end_of_input` 
         asserted in this subexpression specifies should be disregarded (default is True).
+
+        The `expr` parameter must be a correctly defined `SuperExpressive` object 
+        and must not conflict with start-of-input or end-of-input markers 
+        defined in the caller object (see also `ignore_start_and_end` parameter description above).
+        Raises `RegexError` otherwise.
         """
         if not isinstance(expr, SuperExpressive):
             raise RegexError("expr must be a SuperExpressive instance")
